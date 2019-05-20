@@ -30,14 +30,13 @@ import java.util.Objects;
 public class PageMongo extends Auditable {
 
 	@Id
-	private String id;
+	private PagePkMongo id;
 	private String name;
 	private String type;
 	private String title;
 	private String content;
 	private String lastContributor;
 	private int order;
-	private String api;
 	private boolean published;
 	private PageSourceMongo source;
 	private Map<String, String> configuration;
@@ -46,11 +45,11 @@ public class PageMongo extends Auditable {
     private String parentId;
 	private Map<String, String> metadata;
 
-	public String getId() {
+	public PagePkMongo getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(PagePkMongo id) {
 		this.id = id;
 	}
 
@@ -100,14 +99,6 @@ public class PageMongo extends Auditable {
 
 	public void setOrder(int order) {
 		this.order = order;
-	}
-
-	public String getApi() {
-		return api;
-	}
-
-	public void setApi(String api) {
-		this.api = api;
 	}
 
 	public boolean isPublished() {
@@ -185,7 +176,6 @@ public class PageMongo extends Auditable {
 				", content='" + content + '\'' +
 				", lastContributor='" + lastContributor + '\'' +
 				", order=" + order +
-				", api='" + api + '\'' +
 				", published=" + published +
 				", source=" + source +
 				", configuration=" + configuration +

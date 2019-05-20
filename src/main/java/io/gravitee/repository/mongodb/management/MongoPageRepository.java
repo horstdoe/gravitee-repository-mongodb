@@ -19,8 +19,10 @@ import io.gravitee.repository.exceptions.TechnicalException;
 import io.gravitee.repository.management.api.PageRepository;
 import io.gravitee.repository.management.api.search.PageCriteria;
 import io.gravitee.repository.management.model.Page;
+import io.gravitee.repository.management.model.PageReferenceType;
 import io.gravitee.repository.management.model.PageSource;
 import io.gravitee.repository.mongodb.management.internal.model.PageMongo;
+import io.gravitee.repository.mongodb.management.internal.model.PagePkMongo;
 import io.gravitee.repository.mongodb.management.internal.model.PageSourceMongo;
 import io.gravitee.repository.mongodb.management.internal.page.PageMongoRepository;
 import io.gravitee.repository.mongodb.management.mapper.GraviteeMapper;
@@ -58,10 +60,10 @@ public class MongoPageRepository implements PageRepository {
     }
 
     @Override
-    public Optional<Page> findById(String pageId) throws TechnicalException {
+    public Optional<Page> findById(String pageId, String referenceId, PageReferenceType referenceType) throws TechnicalException {
         logger.debug("Find page by ID [{}]", pageId);
 
-        PageMongo page = internalPageRepo.findById(pageId).orElse(null);
+        PageMongo page = internalPageRepo.findById(new PagePkMongo(pageId, referenceId, referenceType.name())).orElse(null);
         Page res = mapper.map(page, Page.class);
 
         logger.debug("Find page by ID [{}] - Done", pageId);
@@ -88,7 +90,7 @@ public class MongoPageRepository implements PageRepository {
             throw new IllegalStateException("Page must not be null");
         }
 
-        PageMongo pageMongo = internalPageRepo.findById(page.getId()).orElse(null);
+        PageMongo pageMongo = internalPageRepo.findById(new PagePkMongo(page.getId(), page.getReferenceId(), page.getReferenceType().name())).orElse(null);
         if (pageMongo == null) {
             throw new IllegalStateException(String.format("No page found with id [%s]", page.getId()));
         }
@@ -99,7 +101,7 @@ public class MongoPageRepository implements PageRepository {
             if (page.getType() != null) {
                 pageMongo.setType(page.getType().name());
             }
-            pageMongo.setApi(page.getApi());
+            pageMongo.setId(new PagePkMongo(page.getId(), page.getReferenceId(), page.getReferenceType().name()));
             pageMongo.setLastContributor(page.getLastContributor());
             pageMongo.setCreatedAt(page.getCreatedAt());
             pageMongo.setUpdatedAt(page.getUpdatedAt());
@@ -127,9 +129,9 @@ public class MongoPageRepository implements PageRepository {
     }
 
     @Override
-    public void delete(String pageId) throws TechnicalException {
+    public void delete(String pageId, String referenceId, PageReferenceType referenceType) throws TechnicalException {
         try {
-            internalPageRepo.deleteById(pageId);
+            internalPageRepo.deleteById(new PagePkMongo(pageId, referenceId, referenceType.name()));
         } catch (Exception e) {
             logger.error("An error occured when deleting page [{}]", pageId, e);
             throw new TechnicalException("An error occured when deleting page");
